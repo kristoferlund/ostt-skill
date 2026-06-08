@@ -171,13 +171,21 @@ brew tap kristoferlund/ostt
 brew install ostt
 ```
 
-AUR:
+AUR — prebuilt binary packages (recommended; no compilation, no Rust toolchain). Pick the one matching the hardware; they conflict with each other and with the source `ostt` package, so only one can be installed:
+
+```bash
+yay -S ostt-bin          # CPU build (x86_64, aarch64)
+yay -S ostt-cuda-bin     # NVIDIA CUDA build (x86_64)
+yay -S ostt-vulkan-bin   # AMD/Intel Vulkan build (x86_64)
+```
+
+`paru` works in place of `yay`. To build from source instead, use the `ostt` package:
 
 ```bash
 yay -S ostt
 ```
 
-Or manually:
+Or build the source package manually:
 
 ```bash
 git clone https://aur.archlinux.org/ostt.git
