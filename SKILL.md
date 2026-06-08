@@ -122,7 +122,8 @@ Unsupported architectures should build from source.
 
 All platforms:
 
-- `ffmpeg` — audio conversion and encoding.
+- `ffmpeg` — audio conversion and encoding (required).
+- `mpv` — optional; preferred player for `ostt replay`. OSTT falls back to `vlc`, `ffplay`, `paplay` (Linux), or `afplay` (macOS) when `mpv` is absent.
 
 Linux clipboard support:
 
@@ -403,7 +404,7 @@ Use `ostt config list-devices` to find microphone names or indexes, then set `[a
 
 ## Popup and Global Hotkeys
 
-`ostt launch` opens OSTT in a popup terminal. Running the same command again signals the running recorder to finish, transcribe, and output the text. This makes it ideal for global hotkeys.
+`ostt launch` opens OSTT in a popup terminal. Running the same command again signals the running recorder to finish, transcribe, and output the text. This makes it ideal for global hotkeys. Alias: `ostt l`.
 
 ```bash
 ostt launch -c
@@ -412,13 +413,28 @@ ostt launch -c -p clean
 ostt launch -- -c -p translate
 ```
 
-Suggested hotkeys:
+> **Critical for hotkeys: use the full path to the binary.** Desktop environments usually do **not** include `~/.local/bin` in the PATH that global hotkeys run with, so a bare `ostt launch ...` keybind silently does nothing. Resolve the absolute path once and use it in every keybind:
+>
+> ```bash
+> command -v ostt   # e.g. /home/you/.local/bin/ostt
+> ```
+>
+> Then bind, for example, `/home/you/.local/bin/ostt launch --paste`.
+
+Suggested hotkeys (substitute the full path from `command -v ostt`):
 
 | Hotkey | Command | Result |
 | --- | --- | --- |
-| `Alt+Space` | `ostt launch -c` | popup recorder, clipboard output |
-| `Alt+Ctrl+Space` | `ostt launch -c -p` | popup recorder with processing action picker |
-| `Alt+Space` | `ostt launch --paste` | popup recorder, paste into focused app |
+| `Alt+Space` | `/path/to/ostt launch --paste` | popup recorder, paste into focused app |
+| `Alt+Space` | `/path/to/ostt launch -c` | popup recorder, clipboard output |
+| `Alt+Ctrl+Space` | `/path/to/ostt launch --paste -p` | popup recorder with processing action picker |
+
+### Per-desktop hotkey setup
+
+- **Hyprland / Omarchy** — bind in `~/.config/hypr/bindings.conf`, e.g. `bindd = ALT, SPACE, ostt, exec, /path/to/ostt launch --paste`, then `hyprctl reload`. Omarchy's `SUPER+V` sends `shift+insert`, so set `[output.paste].paste_key = "shift+insert"`.
+- **GNOME** — Settings → Keyboard → Custom Shortcuts; command `/path/to/ostt launch --paste`. The Wayland compositor controls window placement (`[popup].x`/`y` are ignored; `width`/`height` still apply).
+- **KDE Plasma** — System Settings → Shortcuts → Custom Shortcuts → New → Global Shortcut → Command/URL; action `/path/to/ostt launch --paste`.
+- **macOS** — create a Shortcut (Shortcuts.app) with a *Run Shell Script* action calling `/path/to/ostt launch --paste`, then assign a key. macOS may prompt for **Accessibility permission** for the terminal app the first time paste is used; grant it or paste will silently fail. Use Ghostty, kitty, or Alacritty (Terminal.app lacks truecolor).
 
 Configure popup terminal/window behavior in `~/.config/ostt/ostt.toml` under `[popup]`:
 
@@ -682,7 +698,17 @@ macOS:
 command -v pbcopy
 ```
 
-For paste mode, adjust `[output.paste].paste_key`; some Linux desktops/apps prefer `shift+insert` instead of `ctrl+v`.
+Paste mode works by copying the text to the clipboard, sending a paste shortcut to the focused app, and then optionally restoring the previous clipboard. Configure it under `[output.paste]`:
+
+```toml
+[output.paste]
+paste_key = "ctrl+v"        # macOS default cmd+v; Omarchy default shift+insert
+restore_clipboard = true    # restore previous clipboard after pasting
+restore_delay_ms = 750      # wait before restoring (let the app read the clipboard)
+post_popup_delay_ms = 1000  # delay after the popup closes (for `ostt launch --paste`)
+```
+
+`paste_key` defaults differ by environment: macOS `cmd+v`, Omarchy `shift+insert`, other Linux `ctrl+v`. If paste lands in the wrong app or not at all, increase `post_popup_delay_ms` (focus hasn't returned yet) or switch `paste_key` to what the target app expects (`shift+insert` works in many terminals/X11 apps).
 
 ### No microphone or wrong microphone
 
@@ -721,6 +747,68 @@ ostt daemon status
 ```
 
 Or choose a smaller model such as `whisper/base`, `whisper/small`, or `whisper/turbo`.
+
+### GPU build issues (local models)
+
+The installer auto-selects a GPU build (CUDA on NVIDIA, Vulkan on AMD/Intel, Metal on macOS) and falls back to CPU. Two common failures:
+
+**1. `ostt` won't start at all after install / "library not found" on launch.**
+A GPU build was installed but its runtime libraries are missing. CUDA needs `libcuda.so` + `libcublas.so`; Vulkan needs `libvulkan.so.1` (usually from Mesa). Either install the GPU runtime, or reinstall the CPU build:
+
+```bash
+curl -fsSL https://ostt.ai/install | bash -s -- --no-gpu
+```
+
+**2. Local transcription is slow — is the GPU actually being used?**
+Confirm via the logs; OSTT logs which backend it activated:
+
+```bash
+ostt logs | grep -i "GPU acceleration"
+# Expect one of:
+#   local transcription: CUDA GPU acceleration enabled
+#   local transcription: Vulkan GPU acceleration enabled
+#   local transcription: Metal GPU acceleration enabled
+```
+
+If none appears, OSTT is running on CPU. Reinstall with the appropriate GPU runtime present, or accept CPU and use a smaller model / the daemon. Note: GPU acceleration only affects local `whisper/*` models — cloud providers are unaffected.
+
+### Popup does not appear (`ostt launch`)
+
+First confirm OSTT itself works and a supported terminal is installed:
+
+```bash
+ostt launch -c   # run directly in a terminal, not via the hotkey
+command -v ghostty kitty alacritty foot konsole gnome-terminal xfce4-terminal
+```
+
+- If `ostt launch -c` works directly but the **hotkey** does nothing, the keybind is almost certainly using a bare `ostt` instead of the full path — see the full-path note under "Popup and Global Hotkeys".
+- If no terminal is found, install one (Ghostty, kitty, or Alacritty) and/or set it explicitly:
+
+  ```toml
+  [popup]
+  terminal = "ghostty"
+  ```
+
+- **GNOME Wayland**: the compositor controls window placement, so `[popup].x`/`y` are ignored (`width`/`height` still apply).
+- **macOS**: Terminal.app lacks truecolor — use Ghostty, kitty, or Alacritty.
+
+### Processing action fails
+
+```bash
+ostt process list                 # confirm the action ID exists
+RUST_LOG=debug ostt process clean # see the underlying error
+```
+
+AI-type actions shell out to an external CLI tool that must be installed **and** authenticated:
+
+```bash
+opencode --version   # requires 1.4.3+
+claude --version
+gemini --version
+codex --version
+```
+
+Check that `[process].default_tool` / the action's `tool` matches an installed binary (`opencode`→`opencode`, `claude-code`→`claude`, `gemini-cli`→`gemini`, `codex-cli`→`codex`), that `default_model`/`model` is valid for that tool, and that the tool is logged in. AI actions time out after 300 seconds. Bash-type actions receive the transcript on stdin and must print the result to stdout.
 
 ### Installer dependency failure
 
