@@ -28,13 +28,13 @@ This is the official [agent skill](https://skills.sh) for **[OSTT](https://githu
 > [!TIP]
 > There is nothing to install first — `npx` runs the `skills` CLI on demand:
 > ```bash
-> npx skills add kristoferlund/ostt-skill
+> npx skills add https://github.com/kristoferlund/ostt-skill
 > ```
 
 ## Install
 
 ```bash
-npx skills add kristoferlund/ostt-skill
+npx skills add https://github.com/kristoferlund/ostt-skill
 ```
 
 This installs the skill into the skills directory of every skill-aware agent `npx skills` detects on your machine. Re-run the same command to update to the latest version.
