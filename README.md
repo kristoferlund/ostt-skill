@@ -46,7 +46,7 @@ The skill gives your agent accurate, up-to-date knowledge of OSTT, including:
 - **Installation** — the shell installer and all its flags, Homebrew, AUR (`ostt-bin` / `ostt-cuda-bin` / `ostt-vulkan-bin` and source), `.deb`/`.rpm`, and building from source.
 - **Providers and models** — authenticating cloud providers, choosing models, and per-run overrides.
 - **Recording and files** — recording from the mic, transcribing audio files, retrying, and replaying.
-- **Hotkeys and popup** — `ostt launch`, global hotkeys, current Omarchy Lua and legacy Hyprland configuration, and per-desktop setup for GNOME, KDE, and macOS.
+- **Hotkeys and popup** — `ostt launch`, global hotkeys, Omarchy 4.x alpha Lua and supported Omarchy 3.x Hyprlang configuration, and per-desktop setup for GNOME, KDE, and macOS.
 - **Local models** — downloading Whisper-compatible models, GPU acceleration, and the local model daemon.
 - **Keywords, replacements, and processing actions** — improving accuracy and post-processing with bash or AI tools.
 - **Troubleshooting** — PATH issues, clipboard/paste, GPU build problems, popup failures, processing-action errors, and config debugging.
@@ -57,7 +57,7 @@ Once the skill is added, just ask your agent in plain language. For example:
 
 - "Install OSTT and set up Deepgram as the provider."
 - "Bind OSTT to `Alt+Space` on Hyprland with paste output."
-- "Upgrade my legacy Omarchy OSTT hotkey and popup rules to the current Lua config."
+- "Upgrade my Omarchy 3.x OSTT hotkey and popup rules to the Omarchy 4.x Lua config."
 - "OSTT says `command not found` after install — fix my PATH."
 - "Download a local Whisper model and run it with GPU acceleration."
 - "Add a processing action that cleans up filler words."

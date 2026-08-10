@@ -441,7 +441,7 @@ Suggested hotkeys (substitute the full path from `command -v ostt`):
 
 #### Hyprland and Omarchy
 
-Hyprland configuration formats differ by version. Inspect the installed configuration before writing rules or bindings; do not assume that a system using Omarchy is still using `.conf` files.
+Two supported Omarchy generations use different Hyprland configuration formats. Omarchy 3.x remains supported and uses Hyprlang `.conf` files. Omarchy 4.x is currently in alpha and uses Lua. Inspect the installed configuration before writing rules or bindings; do not assume either format based on the desktop name alone.
 
 ```bash
 hyprctl version
@@ -452,14 +452,14 @@ test -f "$HOME/.config/hypr/bindings.conf" && printf 'Hyprlang bindings found\n'
 hyprctl -j binds
 ```
 
-- **Current Omarchy (Lua)** uses `~/.config/hypr/hyprland.lua` as its entry point and `~/.config/hypr/bindings.lua` for personal hotkeys. Add personal window rules after the default imports in `hyprland.lua`. Never modify packaged Omarchy files under `~/.local/share/omarchy` or `/usr/share/omarchy`.
-- **Legacy Hyprland / Omarchy (Hyprlang)** uses `~/.config/hypr/hyprland.conf` and `~/.config/hypr/bindings.conf`.
-- When asked to upgrade a legacy OSTT configuration, read the active entry point and existing files first. Back up every affected user file, migrate only recognized OSTT binding and window-rule lines, and remove those migrated lines from the old file so the hotkey cannot fire twice. Leave unrelated user configuration untouched.
+- **Omarchy 4.x alpha (Lua)** uses `~/.config/hypr/hyprland.lua` as its entry point and `~/.config/hypr/bindings.lua` for personal hotkeys. Add personal window rules after the default imports in `hyprland.lua`. Never modify packaged Omarchy files under `~/.local/share/omarchy` or `/usr/share/omarchy`.
+- **Omarchy 3.x and legacy Hyprland (Hyprlang)** use `~/.config/hypr/hyprland.conf` and `~/.config/hypr/bindings.conf`.
+- When asked to upgrade an Omarchy 3.x OSTT configuration to Omarchy 4.x, read the active entry point and existing files first. Back up every affected user file, migrate only recognized OSTT binding and window-rule lines, and remove those migrated lines from the old file so the hotkey cannot fire twice. Leave unrelated user configuration untouched.
 - If `Alt+Space` is already bound to another user action, tell the user and ask before replacing it. Resolve `ostt` with `command -v ostt` and use the resulting absolute path.
 
 For current window-rule syntax, always fetch the official [Hyprland Window Rules documentation](https://wiki.hypr.land/Configuring/Basics/Window-Rules/) before editing. The format changes frequently.
 
-##### Current Omarchy Lua
+##### Omarchy 4.x Alpha Lua
 
 Add the hotkey to `~/.config/hypr/bindings.lua`:
 
@@ -478,7 +478,7 @@ o.window({ title = ".*ostt.*" }, {
 })
 ```
 
-##### Legacy Hyprlang
+##### Omarchy 3.x And Legacy Hyprlang
 
 Add the hotkey to `~/.config/hypr/bindings.conf`:
 
