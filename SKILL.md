@@ -470,8 +470,8 @@ o.bind("ALT + SPACE", "OSTT speech-to-text", "/home/you/.local/bin/ostt launch -
 Add the popup rule after the default imports in `~/.config/hypr/hyprland.lua`:
 
 ```lua
--- Keep the OSTT popup floating, pinned, and centered near the bottom edge.
-o.window({ title = ".*ostt.*" }, {
+-- Keep only the OSTT popup floating, pinned, and centered near the bottom edge.
+o.window({ class = "ostt-popup" }, {
   float = true,
   move = { "((monitor_w*0.5)-(window_w*0.5))", "(monitor_h*0.85)" },
   pin = true,
@@ -490,9 +490,9 @@ Add these rules to `~/.config/hypr/hyprland.conf` after broader matching rules:
 
 ```text
 # OSTT window overrides
-windowrule = float on, match:title ostt
-windowrule = move ((monitor_w*0.5)-(window_w*0.5)) (monitor_h*0.85), match:title ostt
-windowrule = pin on, match:title ostt
+windowrule = float on, match:class ostt-popup
+windowrule = move ((monitor_w*0.5)-(window_w*0.5)) (monitor_h*0.85), match:class ostt-popup
+windowrule = pin on, match:class ostt-popup
 ```
 
 After any Hyprland change, run and inspect both commands:
@@ -502,7 +502,7 @@ hyprctl reload
 hyprctl configerrors
 ```
 
-Fix reported errors before considering the change complete. Confirm the expected binding with `hyprctl -j binds`, then test `ostt launch -c`. If the popup does not match the title rule, inspect `hyprctl clients` and narrow the rule to its actual title or class rather than matching a terminal class broadly. Omarchy's `SUPER+V` sends `shift+insert`, so set `[output.paste].paste_key = "shift+insert"`.
+Fix reported errors before considering the change complete. Confirm the expected binding with `hyprctl -j binds`, then test `ostt launch -c`. If the popup does not match the `ostt-popup` class rule, inspect `hyprctl clients` and use its actual class rather than matching a terminal class broadly. Omarchy's `SUPER+V` sends `shift+insert`, so set `[output.paste].paste_key = "shift+insert"`.
 
 - **GNOME** — Settings → Keyboard → Custom Shortcuts; command `/path/to/ostt launch --paste`. The Wayland compositor controls window placement (`[popup].x`/`y` are ignored; `width`/`height` still apply).
 - **KDE Plasma** — System Settings → Shortcuts → Custom Shortcuts → New → Global Shortcut → Command/URL; action `/path/to/ostt launch --paste`.
